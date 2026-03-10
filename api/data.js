@@ -41,8 +41,8 @@ username.includes(q)
 
 result.push({
 name: p1[1],
-telegram_id: telegram_id,
-mobile: mobile,
+telegram_id: p1[2],
+mobile: p1[3],
 username: p2[0]
 });
 
@@ -58,4 +58,4 @@ res.status(500).json({error:e.toString()});
 
 }
 
-}
+  }
