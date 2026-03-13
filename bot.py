@@ -1,15 +1,22 @@
 import requests
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
 
 TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
-
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Send any mobile number to search details.")
 
 
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     number = update.message.text.strip()
+
+    if not number.isdigit():
+        await update.message.reply_text("Please send a valid mobile number")
+        return
 
     try:
         r = requests.get(API + number, timeout=10)
@@ -34,7 +41,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Address: {user.get('address')}\n"
             f"Circle: {user.get('circle')}\n"
             f"ID: {user.get('id')}\n"
-            "--------------------\n"
+            "----------------------\n"
         )
 
     await update.message.reply_text(msg)
@@ -42,6 +49,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 app = ApplicationBuilder().token(TOKEN).build()
 
+app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
 
 print("Bot Started...")
