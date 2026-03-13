@@ -45,15 +45,19 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("No result found")
         return
 
+    msg = ""
+
+for user in results:
+
     msg += (
-    f"📡 Operator: {user.get('name','N/A')}\n"
-    f"👤 Name: {user.get('address','N/A')}\n"
-    f"👨 Father: {user.get('alternate','N/A')}\n"
-    f"📱 Mobile: {user.get('mobile','N/A')}\n"
-    f"📍 Location: {user.get('circle','N/A')}\n"
-    f"📧 Email: {user.get('email','N/A')}\n"
-    f"🆔 ID: {user.get('id','N/A')}\n"
-    "━━━━━━━━━━━━━━\n"
+        f"📡 Operator: {user.get('name','N/A')}\n"
+        f"👤 Name: {user.get('address','N/A')}\n"
+        f"👨 Father: {user.get('alternate','N/A')}\n"
+        f"📱 Mobile: {user.get('mobile','N/A')}\n"
+        f"📍 Location: {user.get('circle','N/A')}\n"
+        f"📧 Email: {user.get('email','N/A')}\n"
+        f"🆔 ID: {user.get('id','N/A')}\n"
+        "━━━━━━━━━━━━━━\n"
     )
 
     await update.message.reply_text(msg)
