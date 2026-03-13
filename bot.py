@@ -1,70 +1,67 @@
-import os
 import requests
-import asyncio
 import threading
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram.ext import Updater, MessageHandler, Filters
 
 TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
+
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
 
-# Web server (Render ke liye)
+# -------- Render Web Server --------
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Bot is running")
 
-def run_web():
+def run():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("0.0.0.0", port), Handler)
     server.serve_forever()
 
-threading.Thread(target=run_web).start()
+threading.Thread(target=run).start()
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Send mobile number to search")
+# -------- Telegram Bot --------
 
-async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def search(update, context):
+
     number = update.message.text.strip()
 
     try:
-        r = requests.get(API + number, timeout=10)
+        r = requests.get(API + number)
         data = r.json()
     except:
-        await update.message.reply_text("API Error")
+        update.message.reply_text("API Error")
         return
 
-    if not data:
-        await update.message.reply_text("No result found")
+    results = data.get("result", [])
+
+    if not results:
+        update.message.reply_text("No result found")
         return
 
     msg = ""
 
-    for user in data:
-        msg += (
-            f"Operator: {user.get('name','N/A')}\n"
-            f"Name: {user.get('address','N/A')}\n"
-            f"Father: {user.get('alternate','N/A')}\n"
-            f"Mobile: {user.get('mobile','N/A')}\n"
-            f"Location: {user.get('circle','N/A')}\n"
-            f"Email: {user.get('email','N/A')}\n"
-            f"ID: {user.get('id','N/A')}\n"
-            "----------------------\n"
-        )
+    for user in results:
 
-    await update.message.reply_text(msg)
+        msg += f"""
+Name : {user.get('name')}
+Father : {user.get('father_name')}
+Mobile : {user.get('mobile')}
+Address : {user.get('address')}
+Circle : {user.get('circle')}
+ID : {user.get('id')}
+--------------------
+"""
 
-async def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    update.message.reply_text(msg)
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
+updater = Updater(TOKEN, use_context=True)
 
-    print("Bot Started")
+dp = updater.dispatcher
+dp.add_handler(MessageHandler(Filters.text, search))
 
-    await app.run_polling()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+updater.start_polling()
+updater.idle()
