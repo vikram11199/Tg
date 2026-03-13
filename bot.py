@@ -1,11 +1,12 @@
 import requests
-from telegram.ext import Updater, MessageHandler, Filters
+from telegram import Update
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
+TOKEN ="8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
 
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
 
-def search(update, context):
+async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     number = update.message.text.strip()
 
@@ -13,19 +14,18 @@ def search(update, context):
         r = requests.get(API + number)
         data = r.json()
     except:
-        update.message.reply_text("API Error")
+        await update.message.reply_text("API Error")
         return
 
     results = data.get("result", [])
 
     if not results:
-        update.message.reply_text("No result found")
+        await update.message.reply_text("No result found")
         return
 
     msg = ""
 
     for user in results:
-
         msg += f"""
 Name : {user.get('name')}
 Father : {user.get('father_name')}
@@ -36,12 +36,11 @@ ID : {user.get('id')}
 --------------------
 """
 
-    update.message.reply_text(msg)
+    await update.message.reply_text(msg)
 
-updater = Updater(TOKEN, use_context=True)
 
-dp = updater.dispatcher
-dp.add_handler(MessageHandler(Filters.text, search))
+app = ApplicationBuilder().token(TOKEN).build()
 
-updater.start_polling()
-updater.idle()
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), search))
+
+app.run_polling()
