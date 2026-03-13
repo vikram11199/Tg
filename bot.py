@@ -25,10 +25,6 @@ threading.Thread(target=run_server).start()
 # --------------------------------------------
 
 # -------- Telegram Commands --------
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Send mobile number to search")
-
-
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     number = update.message.text.strip()
 
@@ -47,21 +43,19 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = ""
 
-for user in results:
-
-    msg += (
-        f"📡 Operator: {user.get('name','N/A')}\n"
-        f"👤 Name: {user.get('address','N/A')}\n"
-        f"👨 Father: {user.get('alternate','N/A')}\n"
-        f"📱 Mobile: {user.get('mobile','N/A')}\n"
-        f"📍 Location: {user.get('circle','N/A')}\n"
-        f"📧 Email: {user.get('email','N/A')}\n"
-        f"🆔 ID: {user.get('id','N/A')}\n"
-        "━━━━━━━━━━━━━━\n"
-    )
+    for user in results:
+        msg += (
+            f"📡 Operator: {user.get('name','N/A')}\n"
+            f"👤 Name: {user.get('address','N/A')}\n"
+            f"👨 Father: {user.get('alternate','N/A')}\n"
+            f"📱 Mobile: {user.get('mobile','N/A')}\n"
+            f"📍 Location: {user.get('circle','N/A')}\n"
+            f"📧 Email: {user.get('email','N/A')}\n"
+            f"🆔 ID: {user.get('id','N/A')}\n"
+            "━━━━━━━━━━━━━━\n"
+        )
 
     await update.message.reply_text(msg)
-
 # -------- Bot Start --------
 app = ApplicationBuilder().token(TOKEN).build()
 
