@@ -5,26 +5,25 @@ from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filte
 TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
 
+
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     number = update.message.text.strip()
 
     try:
-        r = requests.get(API + number)
+        r = requests.get(API + number, timeout=10)
         data = r.json()
     except:
         await update.message.reply_text("API Error")
         return
 
-    results = data.get("result", [])
-
-    if not results:
+    if not data:
         await update.message.reply_text("No result found")
         return
 
     msg = ""
 
-    for user in results:
+    for user in data:
         msg += f"""
 Name : {user.get('name')}
 Father : {user.get('father_name')}
@@ -38,10 +37,15 @@ ID : {user.get('id')}
     await update.message.reply_text(msg)
 
 
-app = ApplicationBuilder().token(TOKEN).build()
+def main():
+    app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(MessageHandler(filters.TEXT, search))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
 
-print("Bot Started")
+    print("Bot Started")
 
-app.run_polling()
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
