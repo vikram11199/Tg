@@ -1,12 +1,14 @@
 import requests
 import threading
 import os
+import imghdr
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram.ext import Updater, MessageHandler, Filters
 
 TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
 
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
+
 
 # -------- Render Web Server --------
 
