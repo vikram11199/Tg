@@ -1,3 +1,4 @@
+
 import os
 import requests
 import asyncio
@@ -24,7 +25,9 @@ def run_server():
 threading.Thread(target=run_server).start()
 # --------------------------------------------
 
-# -------- Telegram Commands --------
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Send mobile number to search")
+
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     number = update.message.text.strip()
 
@@ -35,7 +38,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("API Error")
         return
 
-    results = data.get("result", [])
+    results = data
 
     if not results:
         await update.message.reply_text("No result found")
@@ -56,7 +59,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     await update.message.reply_text(msg)
-# -------- Bot Start --------
+
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
@@ -64,10 +67,4 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
 
 print("Bot Started...")
 
-async def main():
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await asyncio.Event().wait()
-
-asyncio.run(main())
+app.run_polling()
