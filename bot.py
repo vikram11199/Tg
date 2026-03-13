@@ -1,5 +1,6 @@
 import os
 import requests
+import asyncio
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
@@ -8,12 +9,12 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 TOKEN = "8666830779:AAGaEn-Z3oDMQQ8vOM8NpdWOupbTdP0GEcY"
 API = "https://ayaanmods.site/number.php?key=annonymous&number="
 
-# ---- Render ke liye web server ----
+# -------- Web Server (Render ke liye) --------
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot running")
+        self.wfile.write(b"Bot is running")
 
 def run_server():
     port = int(os.environ.get("PORT", 10000))
@@ -21,15 +22,14 @@ def run_server():
     server.serve_forever()
 
 threading.Thread(target=run_server).start()
-# -----------------------------------
+# --------------------------------------------
 
-
+# -------- Telegram Commands --------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Send mobile number")
+    await update.message.reply_text("Send mobile number to search")
 
 
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     number = update.message.text.strip()
 
     try:
@@ -46,34 +46,27 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     msg = ""
-
     for user in results:
-
-        name = user.get("name", "N/A")
-        father = user.get("father_name", "N/A")
-        mobile = user.get("mobile", "N/A")
-        address = user.get("address", "N/A")
-        circle = user.get("circle", "N/A")
-        uid = user.get("id", "N/A")
-
         msg += (
-            f"👤 Name: {name}\n"
-            f"👨 Father: {father}\n"
-            f"📱 Mobile: {mobile}\n"
-            f"📍 Address: {address}\n"
-            f"🌐 Circle: {circle}\n"
-            f"🆔 ID: {uid}\n"
-            "━━━━━━━━━━━━━━\n"
+            f"Name: {user.get('name')}\n"
+            f"Mobile: {user.get('mobile')}\n"
+            "----------------\n"
         )
 
     await update.message.reply_text(msg)
 
-
+# -------- Bot Start --------
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
 
-print("Bot Started")
+print("Bot Started...")
 
-app.run_polling()
+async def main():
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await asyncio.Event().wait()
+
+asyncio.run(main())
